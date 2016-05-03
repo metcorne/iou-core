@@ -82,14 +82,14 @@ final class PromiseState<TFulfill> {
 
         @Override
         public void fulfill(TFulfill o) throws Exception {
+            _fulfiller.fulfill(_resolvedWith);
+
             if (_state == State.PENDING) {
                 _state = State.RESOLVED;
 
                 _resolvedWith = o;
-
             }
 
-            _fulfiller.fulfill(_resolvedWith);
             for (IFulfillerListener<TFulfill> listener : _fulfillerListeners) {
                 listener.onFulfill(_resolvedWith);
             }
@@ -97,13 +97,14 @@ final class PromiseState<TFulfill> {
 
         @Override
         public <TAnything> void reject(TAnything reason) throws Exception {
+            _rejector.reject(_rejectionReason);
+
             if (_state == State.PENDING) {
                 _state = State.REJECTED;
 
                 _rejectionReason = reason;
             }
 
-            _rejector.reject(_rejectionReason);
             for (IRejectorListener listener : _rejectorListeners) {
                 listener.onReject(_rejectionReason);
             }

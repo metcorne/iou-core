@@ -56,4 +56,9 @@ public abstract class AbstractPromise<TFulfill> implements IThenable<TFulfill> {
     void shareStateWith(PromiseState state) throws Exception {
         state.registerPromiseState(this, _promiseState);
     }
+
+    public void waitSynchronously() {
+        new WaitForPromiseSynchronously(_promiseState);
+    }
+
 }
