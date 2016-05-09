@@ -1,13 +1,31 @@
 package nl.brusque.iou;
 
 public class WaitForPromiseSynchronously implements IFulfillerListener, IRejectorListener {
-    public WaitForPromiseSynchronously(PromiseState promiseState) {
-        promiseState.addFulfillerListener(this);
-        promiseState.addRejectorListener(this);
+    private final PromiseState _promiseState;
+    private static Integer _pendingPromises = 0;
 
+    private static final class Lock { }
+    private static final Object lock = new Lock();
+
+    public WaitForPromiseSynchronously(PromiseState promiseState) {
+        _promiseState = promiseState;
+
+        _promiseState.addFulfillerListener(this);
+        _promiseState.addRejectorListener(this);
+
+        synchronized (lock) {
+            _pendingPromises++;
+
+            System.out.println(_pendingPromises);
+        }
+    }
+
+    public void waitSynchronous() {
         try {
-            synchronized (this) {
-                wait();
+            synchronized (lock) {
+                System.out.println("wait..");
+                lock.wait();
+                System.out.println("YES DONE");
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -16,15 +34,31 @@ public class WaitForPromiseSynchronously implements IFulfillerListener, IRejecto
 
     @Override
     public void onFulfill(Object o) throws Exception {
-        synchronized (this) {
-            notifyAll();
+        synchronized (lock) {
+            if (!_promiseState.isPending()) {
+                _pendingPromises--;
+            }
+
+            System.out.println(_pendingPromises);
+
+            if (_pendingPromises <= 0) {
+                lock.notifyAll();
+            }
         }
     }
 
     @Override
     public void onReject(Object value) throws Exception {
-        synchronized (this) {
-            notifyAll();
+        synchronized (_pendingPromises) {
+            if (!_promiseState.isPending()) {
+                _pendingPromises--;
+            }
+
+            System.out.println(_pendingPromises);
+
+            if (_pendingPromises <= 0) {
+                lock.notifyAll();
+            }
         }
     }
 }

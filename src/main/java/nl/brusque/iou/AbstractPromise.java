@@ -3,6 +3,7 @@ package nl.brusque.iou;
 public abstract class AbstractPromise<TFulfill> implements IThenable<TFulfill> {
     private final PromiseEventHandler<TFulfill> _promiseEventHandler;
     private final PromiseState<TFulfill> _promiseState;
+    private final WaitForPromiseSynchronously _waitForPromiseSynchronously;
 
     private static class DefaultThenCallableStrategy extends AbstractThenCallableStrategy {
         @Override
@@ -16,6 +17,7 @@ public abstract class AbstractPromise<TFulfill> implements IThenable<TFulfill> {
     }
 
     protected AbstractPromise(AbstractThenCallableStrategy thenCaller) {
+        System.out.println("AbstractPromise");
         ResolvableManager<TFulfill> resolvableManager = new ResolvableManager<>();
 
         _promiseState = new PromiseState<>(
@@ -24,6 +26,8 @@ public abstract class AbstractPromise<TFulfill> implements IThenable<TFulfill> {
                 new Rejector<>(resolvableManager));
 
         _promiseEventHandler = new PromiseEventHandler<>(_promiseState, resolvableManager, thenCaller);
+
+        _waitForPromiseSynchronously = new WaitForPromiseSynchronously(_promiseState);
     }
 
     protected abstract <TAnythingFulfill> AbstractPromise<TAnythingFulfill> create();
@@ -58,7 +62,7 @@ public abstract class AbstractPromise<TFulfill> implements IThenable<TFulfill> {
     }
 
     public void waitSynchronously() {
-        new WaitForPromiseSynchronously(_promiseState);
+        _waitForPromiseSynchronously.waitSynchronous();
     }
 
 }

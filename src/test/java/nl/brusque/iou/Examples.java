@@ -22,7 +22,7 @@ public class Examples {
 
         iou.resolve(42); // prints 42
 
-        allowTestToFinish();
+        iou.getPromise().waitSynchronously();
     }
 
     @Test
@@ -53,7 +53,7 @@ public class Examples {
 
         iou.resolve(42); // prints "The result: 420"
 
-        allowTestToFinish();
+        iou.getPromise().waitSynchronously();
     }
 
     @Test
@@ -85,7 +85,7 @@ public class Examples {
 
         iou.resolve(42); // prints "42" and "42 * 10 = 420" in exactly this order
 
-        allowTestToFinish();
+        iou.getPromise().waitSynchronously();
     }
 
     @Test
@@ -109,7 +109,7 @@ public class Examples {
 
         iou.reject("I'm sorry, Dave."); // prints "I'm sorry, Dave. I can't do that."
 
-        allowTestToFinish();
+        iou.getPromise().waitSynchronously();
     }
 
     @Test
@@ -141,14 +141,44 @@ public class Examples {
 
         iou.resolve(42); // prints "It's not that I'm lazy, it's that I just don't care."
 
-        allowTestToFinish();
+        iou.getPromise().waitSynchronously();
     }
 
-    private void allowTestToFinish() {
-        try {
-            Thread.sleep(50);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    @Test
+    public void testSynchronousPromise() {
+        TestTypedIOU<Integer> iou = new TestTypedIOU<>();
+
+        iou.getPromise()
+                .then(new IThenCallable<Integer, Integer>() {
+                    @Override
+                    public Integer apply(Integer input) throws Exception {
+                        throw new Exception("I just don't care");
+                    }
+                })
+                .then(new IThenCallable<Integer, Void>() {
+                    @Override
+                    public Void apply(Integer input) throws Exception {
+                        System.out.println("What would you say it is you do here?");
+
+                        return null;
+                    }
+                } ,new IThenCallable<Object, Void>() {
+                    @Override
+                    public Void apply(Object reason) throws Exception {
+                        Thread.sleep(10000);
+
+                        System.out.println(String.format("It's not that I'm lazy, it's that %s.", ((Exception)reason).getMessage()));
+
+                        return null;
+                    }
+                });
+
+        iou.resolve(42); // prints "It's not that I'm lazy, it's that I just don't care." after 1 second
+
+        System.out.println("even wachten");
+
+        iou.getPromise().waitSynchronously();
+
+        System.out.println("DONE");
     }
 }
