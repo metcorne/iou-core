@@ -15,17 +15,13 @@ public class WaitForPromiseSynchronously implements IFulfillerListener, IRejecto
 
         synchronized (lock) {
             _pendingPromises++;
-
-            System.out.println(_pendingPromises);
         }
     }
 
     public void waitSynchronous() {
         try {
             synchronized (lock) {
-                System.out.println("wait..");
                 lock.wait();
-                System.out.println("YES DONE");
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -39,8 +35,6 @@ public class WaitForPromiseSynchronously implements IFulfillerListener, IRejecto
                 _pendingPromises--;
             }
 
-            System.out.println(_pendingPromises);
-
             if (_pendingPromises <= 0) {
                 lock.notifyAll();
             }
@@ -53,8 +47,6 @@ public class WaitForPromiseSynchronously implements IFulfillerListener, IRejecto
             if (!_promiseState.isPending()) {
                 _pendingPromises--;
             }
-
-            System.out.println(_pendingPromises);
 
             if (_pendingPromises <= 0) {
                 lock.notifyAll();

@@ -165,7 +165,7 @@ public class Examples {
                 } ,new IThenCallable<Object, Void>() {
                     @Override
                     public Void apply(Object reason) throws Exception {
-                        Thread.sleep(10000);
+                        Thread.sleep(1000);
 
                         System.out.println(String.format("It's not that I'm lazy, it's that %s.", ((Exception)reason).getMessage()));
 
@@ -175,10 +175,6 @@ public class Examples {
 
         iou.resolve(42); // prints "It's not that I'm lazy, it's that I just don't care." after 1 second
 
-        System.out.println("even wachten");
-
         iou.getPromise().waitSynchronously();
-
-        System.out.println("DONE");
     }
 }

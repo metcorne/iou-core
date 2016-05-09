@@ -17,7 +17,6 @@ public abstract class AbstractPromise<TFulfill> implements IThenable<TFulfill> {
     }
 
     protected AbstractPromise(AbstractThenCallableStrategy thenCaller) {
-        System.out.println("AbstractPromise");
         ResolvableManager<TFulfill> resolvableManager = new ResolvableManager<>();
 
         _promiseState = new PromiseState<>(
